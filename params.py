@@ -1,3 +1,5 @@
+
+import numpy as np
 ARENA_SIZE = 100.0 
 NUMBER_OF_ROBOTS = 50
 STEP_SIZE= 1.0
