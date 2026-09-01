@@ -7,7 +7,7 @@ import resource_site_a as rsa
 
 def random_walk_step_two_sites(positions, states, grid_A, grid_B, step_size,arena_size, gradient_bias, rng):
     pos_after_bias_A = rsa.random_walk_step(positions, states, grid_A, p.SUPPORT_A,step_size, arena_size, gradient_bias, rng)
-    pos_after_bias_B = rsa.random_walk_step(positions, states, grid_A, p.SUPPORT_B,step_size, arena_size, gradient_bias, rng)
+    pos_after_bias_B = rsa.random_walk_step(positions, states, grid_B, p.SUPPORT_B,step_size, arena_size, gradient_bias, rng)
     mask_A = rsa.committed_mask(states, p.SUPPORT_A)
     mask_B = rsa.committed_mask(states, p.SUPPORT_B)
     mask_U = ~(mask_A | mask_B)
