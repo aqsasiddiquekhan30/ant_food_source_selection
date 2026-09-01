@@ -9,7 +9,7 @@ RESOURCE_SITE_A  = np.array([75.0, 75.0])
 RESOURCE_SITE_B  = np.array([25.0, 25.0]) 
 
 RNG_SEED = 42
-rng=np.random.default_rng(RNG_SEED)
+rng =np.random.default_rng(RNG_SEED)
 QUALITY_A = 0.9
 QUALITY_B = 0.4
 

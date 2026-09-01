@@ -16,10 +16,7 @@ def walk(positions, step_size, arena_size, rng):
     return new_pos
 def site_detected(positions, site_position, detection_radius):
     distances = np.linalg.norm(positions - site_position, axis = 1)
-    if distances <= detection_radius:
-        return True
-    else: 
-        return False
+    return np.less_equal(distances, detection_radius)
 def run_base_environment():
     positions = rand_robo_placement(p.NUMBER_OF_ROBOTS, p.ARENA_SIZE, p.rng)
     has_discovered = np.zeros(p.NUMBER_OF_ROBOTS, dtype=bool)
@@ -27,9 +24,9 @@ def run_base_environment():
     trajectory = []
     for traj in range(p.NUMBER_OF_STEPS):
         positions = walk(positions, p.STEP_SIZE, p.ARENA_SIZE, p.rng)
-        curr_in_range = site_detected(positions, p.RESOURCE_SITE, p.DETECTION_RADIUS)
+        curr_in_range = site_detected(positions, p.RESOURCE_SITE_A, p.SENSING_RADIUS)
         has_discovered = has_discovered | curr_in_range
         found_ratio[traj] = has_discovered.mean()
         trajectory.append(positions[0].copy())
-    return found_ratio, np.arary(trajectory), positions        
+    return found_ratio, np.array(trajectory), positions        
 

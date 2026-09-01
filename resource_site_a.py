@@ -38,10 +38,7 @@ def random_walk_step(positions, states, p_grid, support_value,step_size, arena_s
         gx = grad_x[index[:, 0], index[:, 1]]
         gy = grad_y[index[:, 0], index[:, 1]]
         normalize = np.sqrt(gx ** 2 + gy **2)
-        if normalize > 0:
-            has_gradient = True
-        else:
-            has_gradient = False            
+        has_gradient = np.greater(normalize, 1e-8)            
         gx_unit = np.where(has_gradient, gx / np.where(normalize > 0, normalize, 1), 0)
         gy_unit = np.where(has_gradient, gy / np.where(normalize > 0, normalize, 1), 0)
         eff_bias = np.where(has_gradient, gradient_bais, 0.0)
@@ -70,10 +67,10 @@ def sense_local_pheromone(p_grid, positions, sensing_radius):
     index = convert_to_int_grid(positions, p.GRID_UNIT, p.SIZE_OF_GRID)
     sensed = np.zeros(positions.shape[0])
     for i, (index_x,index_y) in enumerate(index):
-        x_low, x_high = max(0,index_x - radius_units), min(p.SIZE_OF_GRID, index_x, radius_units +1)
-        y_low, y_high = max(0,index_y- radius_units), min(p.SIZE_OF_GRID, index_y, radius_units +1) 
+        x_low, x_high = max(0,index_x - radius_units), min(p.SIZE_OF_GRID, index_x + radius_units +1)
+        y_low, y_high = max(0,index_y- radius_units), min(p.SIZE_OF_GRID, index_y+radius_units +1) 
         neighbourhood = p_grid[x_low:x_high, y_low:y_high]
-        if neighbourhood > 0:
+        if neighbourhood.size > 0:
             sensed[i] = neighbourhood.mean()
         else:
             0.0
@@ -125,7 +122,7 @@ def update(states, positions, p_grid, rng):
     return states
 def run_pheronome_environment():
     positions, states = initialize_robots(p.NUMBER_OF_ROBOTS, p.ARENA_SIZE, p.rng)
-    p_grid = np.zeros((p.GRID_SIZE, p.GRID_SIZE))
+    p_grid = np.zeros((p.SIZE_OF_GRID, p.SIZE_OF_GRID))
     fraction_over_time_A = np.zeros(p.NUMBER_OF_STEPS)
     total_pheromone_over_time = np.zeros(p.NUMBER_OF_STEPS)
     for t in range(p.NUMBER_OF_STEPS):
