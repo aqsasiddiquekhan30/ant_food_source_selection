@@ -23,25 +23,25 @@ def run_experiments(n_values=p.NUM_VALUES, n_seeds=p.NUM_SEEDS, n_steps=None):
     records = []
     for n in n_values:
         for seed in range(n_seeds):
-            xA, xB, xU, *_ = rsb(n_robots=n, n_steps=n_steps, seed=seed)
-            agreement_time = agreement_time(xA, xB)
+            xa, xb, xu, *_ = rsb(n_robots=n, n_steps=n_steps, seed=seed)
+            agreement_time = agreement_time(xa, xb)
             records.append({
                 "N": n, "seed": seed,
-                "final_xA": xA[-1], "final_xB": xB[-1], "final_xU": xU[-1],
+                "final_xa": xa[-1], "final_xb": xb[-1], "final_xu": xu[-1],
                 "consensus_time": agreement_time,
                 "converged": not np.isnan(agreement_time),
-                "correct_choice": xA[-1] > xB[-1],
+                "correct_choice": xa[-1] > xb[-1],
             })
-            print(f"N={n:3d} seed={seed:2d}  final_xA={xA[-1]:.2f} "
-                  f"final_xB={xB[-1]:.2f} final_xU={xU[-1]:.2f}  consensus_time={agreement_time}")
+            print(f"N={n:3d} seed={seed:2d}  final_xa={xa[-1]:.2f} "
+                  f"final_xb={xb[-1]:.2f} final_xu={xu[-1]:.2f}  consensus_time={agreement_time}")
     return pd.DataFrame.from_records(records)
  
  
 def summarize(df):
     return df.groupby("N").agg(
-        mean_final_xA=("final_xA", "mean"), std_final_xA=("final_xA", "std"),
-        mean_final_xB=("final_xB", "mean"), std_final_xB=("final_xB", "std"),
-        mean_final_xU=("final_xU", "mean"), std_final_xU=("final_xU", "std"),
+        mean_final_xa=("final_xa", "mean"), std_final_xa=("final_xa", "std"),
+        mean_final_xb=("final_xb", "mean"), std_final_xb=("final_xb", "std"),
+        mean_final_xu=("final_xu", "mean"), std_final_xu=("final_xu", "std"),
         consensus_rate=("converged", "mean"),
         mean_consensus_time=("consensus_time", lambda s: s.dropna().mean() if s.notna().any() else np.nan),
         decision_accuracy=("correct_choice", "mean"),
@@ -55,12 +55,12 @@ def plot_results(df_summary, save_path="experiments_results.png"):
  
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
  
-    axes[0].bar(x, df_summary["mean_final_xA"], width, label="xA", color="tab:green")
-    axes[0].bar(x, df_summary["mean_final_xB"], width, bottom=df_summary["mean_final_xA"],
-                label="xB", color="tab:red")
-    axes[0].bar(x, df_summary["mean_final_xU"], width,
-                bottom=df_summary["mean_final_xA"] + df_summary["mean_final_xB"],
-                label="xU", color="tab:gray")
+    axes[0].bar(x, df_summary["mean_final_xa"], width, label="xa", color="tab:green")
+    axes[0].bar(x, df_summary["mean_final_xb"], width, bottom=df_summary["mean_final_xa"],
+                label="xb", color="tab:red")
+    axes[0].bar(x, df_summary["mean_final_xu"], width,
+                bottom=df_summary["mean_final_xa"] + df_summary["mean_final_xb"],
+                label="xu", color="tab:gray")
     axes[0].set_xticks(x); axes[0].set_xticklabels(n_values)
     axes[0].set_xlabel("Swarm size (N)"); axes[0].set_ylabel("Mean final fraction")
     axes[0].set_title("Final Opinion State vs Swarm Size")
@@ -68,7 +68,7 @@ def plot_results(df_summary, save_path="experiments_results.png"):
  
     axes[1].bar(x, df_summary["decision_accuracy"], width, color="tab:blue")
     axes[1].set_xticks(x); axes[1].set_xticklabels(n_values)
-    axes[1].set_xlabel("Swarm size (N)"); axes[1].set_ylabel("Fraction with final xA > final xB")
+    axes[1].set_xlabel("Swarm size (N)"); axes[1].set_ylabel("Fraction with final xa > final xb")
     axes[1].set_title("Decision Accuracy vs Swarm Size")
     axes[1].set_ylim(0, 1.05)
  
