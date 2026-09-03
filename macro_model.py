@@ -6,7 +6,7 @@ import params as p
 import resource_site_b as rsb
 
 def get_abm_trajectory(num_of_robots=None, number_of_steps = None, seed=None):
-    xa, xb, xu, grid_A, grid_B, positions, states = rsb(num_of_robots=num_of_robots, number_of_steps = number_of_steps, seed=seed)
+    xa, xb, xu, grid_A, grid_B, positions, states = rsb.run_two_site_environment(n_robots=num_of_robots, n_steps = number_of_steps, seed=seed)
     return xa, xb, xu
 
 def smoothing(xa, xb, xu, dt=1.0, window=20):
@@ -14,7 +14,7 @@ def smoothing(xa, xb, xu, dt=1.0, window=20):
     smoothed = []
     for arr in (xa, xb, xu):
         trimmed = arr[: number_of_windows * window]
-        smoothed.apped(trimmed.reshape(number_of_windows, window).mean(axis=1))
+        smoothed.append(trimmed.reshape(number_of_windows, window).mean(axis=1))
     xa_smoothed, xb_smoothed, xu_smoothed = smoothed
     smoothed_time_axis = np.arange(len(xa_smoothed)) * window * dt
     dxa_dt = np.diff(xa_smoothed) / (window * dt)
@@ -54,9 +54,9 @@ def macro_odes(t, y, params_fit):
     dxb =  params_fit["alpha_B"] * xu + params_fit["rho_B"] * xb * xu - params_fit["gamma_B"] * xb
     return [dxa, dxb]
 
-def run_model(params_fit, time_span, y0, num_points):
-    time_evaluation = np.linsapce(time_span[0], time_span[1], num_points)
-    sol = solve_ivp(macro_odes, time_span, y0, args = (params_fit,), time_evaluation=time_evaluation, method="RK45")
+def run_model(params_fit, time_span, y0, num_points=500):
+    time_evaluation = np.linspace(time_span[0], time_span[1], num_points)
+    sol = solve_ivp(macro_odes, time_span, y0, args = (params_fit,), t_eval=time_evaluation, method="RK45")
     xa_ode = sol.y[0]
     xb_ode = sol.y[1]
     xu_ode = 1 - xa_ode - xb_ode
@@ -64,8 +64,8 @@ def run_model(params_fit, time_span, y0, num_points):
 
 def run_and_plot(save_path="macro_model_results.png"):
     print("Regenerating ABM trajectory...")
-    xA, xB, xU = get_abm_trajectory(n_robots=p.NUMBER_OF_ROBOTS,
-                                     n_steps=p.NUMBER_OF_STEPS, seed=p.RNG_SEED)
+    xA, xB, xU = get_abm_trajectory(num_of_robots=p.NUMBER_OF_ROBOTS,
+                                     number_of_steps=p.NUMBER_OF_STEPS, seed=p.RNG_SEED)
 
     print("Fitting macro parameters via least squares...")
     params_fit, (t_s, xA_s, xB_s, xU_s) = smoothing(xA, xB, xU, dt=1.0, window=20)

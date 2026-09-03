@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 def agreement_time(xa, xb):
     decided= xa+xb 
-    with p.errstate(divide='ignore', invalid= "ignore"):
-        share_A = np.where(decided > 0 , xa/np.where(decided > 0, decided > 1), 0)
+    with np.errstate(divide='ignore', invalid= "ignore"):
+        share_A = np.where(decided > 0, xa / np.where(decided > 0, decided, 1), 0)
         eligible = decided >= p.MIN_DECIDED_RATIO
     agree_A = eligible & (share_A >= p.AGREEMENT_THRESHOLD)
     agree_B = eligible & (share_A <= (1 - p.AGREEMENT_THRESHOLD))
@@ -23,17 +23,17 @@ def run_experiments(n_values=p.NUM_VALUES, n_seeds=p.NUM_SEEDS, n_steps=None):
     records = []
     for n in n_values:
         for seed in range(n_seeds):
-            xa, xb, xu, *_ = rsb(n_robots=n, n_steps=n_steps, seed=seed)
-            agreement_time = agreement_time(xa, xb)
+            xa, xb, xu, *_ = rsb.run_two_site_environment(n_robots=n, n_steps=n_steps, seed=seed)
+            agree_time = agreement_time(xa, xb)
             records.append({
                 "N": n, "seed": seed,
                 "final_xa": xa[-1], "final_xb": xb[-1], "final_xu": xu[-1],
-                "consensus_time": agreement_time,
-                "converged": not np.isnan(agreement_time),
+                "agreement_time": agree_time,
+                "converged": not np.isnan(agree_time),
                 "correct_choice": xa[-1] > xb[-1],
             })
             print(f"N={n:3d} seed={seed:2d}  final_xa={xa[-1]:.2f} "
-                  f"final_xb={xb[-1]:.2f} final_xu={xu[-1]:.2f}  consensus_time={agreement_time}")
+                  f"final_xb={xb[-1]:.2f} final_xu={xu[-1]:.2f}  agreement_time={agree_time}")
     return pd.DataFrame.from_records(records)
  
  
@@ -43,7 +43,7 @@ def summarize(df):
         mean_final_xb=("final_xb", "mean"), std_final_xb=("final_xb", "std"),
         mean_final_xu=("final_xu", "mean"), std_final_xu=("final_xu", "std"),
         consensus_rate=("converged", "mean"),
-        mean_consensus_time=("consensus_time", lambda s: s.dropna().mean() if s.notna().any() else np.nan),
+        mean_consensus_time=("agreement_time", lambda s: s.dropna().mean() if s.notna().any() else np.nan),
         decision_accuracy=("correct_choice", "mean"),
     ).reset_index()
  

@@ -80,10 +80,7 @@ def discover(states, positions, site_position, detection_radius, quality,support
     n=states.shape[0]
     distance_to_site = np.linalg.norm(positions - site_position, axis=1)
     in_range= distance_to_site <= detection_radius
-    if states == p.UNDECIDED:
-        undecided = True
-    else:
-        undecided = False
+    undecided = np.equal(states, p.UNDECIDED)
     discover_candidates = undecided & in_range
     discover_rolls = rng.uniform(0, 1, size=n)
     newly_discovered = discover_candidates & (discover_rolls < quality)
@@ -92,10 +89,7 @@ def discover(states, positions, site_position, detection_radius, quality,support
 def recruit(states, positions, p_grid, sensing_radius, recruitment_scale,support_value, rng):
     n=states.shape[0]
     
-    if states == p.UNDECIDED:
-        still_undecided = True
-    else:
-        still_undecided = False
+    still_undecided = np.equal(states, p.UNDECIDED)
     if np.any(still_undecided):
         sensed = sense_local_pheromone(p_grid, positions, sensing_radius)
         adopt_prob = np.clip(recruitment_scale * sensed, 0, 1)
@@ -106,10 +100,7 @@ def recruit(states, positions, p_grid, sensing_radius, recruitment_scale,support
     
 def abandon(states, support_value, abandon_rate, rng):
     n=states.shape[0]
-    if states == support_value:
-        committed = True
-    else:
-        committed = False
+    committed = np.equal(states, support_value)
     abandon_rolls = rng.uniform(0,1,size=n)
     abandoing = committed & (abandon_rolls < abandon_rate)
     states[abandoing] = p.UNDECIDED
@@ -126,10 +117,10 @@ def run_pheronome_environment():
     fraction_over_time_A = np.zeros(p.NUMBER_OF_STEPS)
     total_pheromone_over_time = np.zeros(p.NUMBER_OF_STEPS)
     for t in range(p.NUMBER_OF_STEPS):
-        positions = random_walk_step(positions, states, p_grid,p.STEP_SIZE, p.ARENA_SIZE, p.GRADIENT_BIAS, p.rng)
+        positions = random_walk_step(positions, states, p_grid, p.SUPPORT_A, p.STEP_SIZE, p.ARENA_SIZE, p.GRADIENT_BIAS, p.rng)
         states = update(states, positions, p_grid, p.rng)
-        dp=deposit_pheromone(p_grid, positions, states, p.DEPOSIT_AMOUNT_A)
-        pheronome_grid *= (1 - p.EVAPORATION_RATE)
+        dp = deposit_pheromone(p_grid, positions, states, p.SUPPORT_A, p.DEPOSIT_AMOUNT_A)
+        p_grid *= (1 - p.EVAPORATION_RATE)
         fraction_over_time_A[t] = np.mean(states==p.SUPPORT_A)
         total_pheromone_over_time[t] = p_grid.sum()
     return fraction_over_time_A, total_pheromone_over_time, p_grid, positions, states

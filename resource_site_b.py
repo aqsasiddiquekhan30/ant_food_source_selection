@@ -18,9 +18,9 @@ def random_walk_step_two_sites(positions, states, grid_A, grid_B, step_size,aren
     return new_pos
 
 def update_two_sites(states,positions, grid_A, grid_B, rng):
-    states = rsa.discover(states, positions, p.RESOURCE_SITE_A, p.DETECTION_RADIUS,
+    states = rsa.discover(states, positions, p.RESOURCE_SITE_A, p.SENSING_RADIUS,
                          p.QUALITY_A, p.SUPPORT_A, rng)
-    states = rsa.discover(states, positions, p.RESOURCE_SITE_B, p.DETECTION_RADIUS,
+    states = rsa.discover(states, positions, p.RESOURCE_SITE_B, p.SENSING_RADIUS,
                          p.QUALITY_B, p.SUPPORT_B, rng)
  
     states = rsa.recruit(states, positions, grid_A, p.SENSING_RADIUS,
@@ -32,16 +32,16 @@ def update_two_sites(states,positions, grid_A, grid_B, rng):
     states = rsa.abandon(states, p.SUPPORT_B, p.ABANDON_RATE, rng)
     return states
 
-def run_two_site_environment():
+def run_two_site_environment(n_robots=None, n_steps=None, seed=None):
     positions, states = rsa.initialize_robots(p.NUMBER_OF_ROBOTS, p.ARENA_SIZE, p.rng)
     grid_A = np.zeros((p.SIZE_OF_GRID, p.SIZE_OF_GRID))
     grid_B = np.zeros((p.SIZE_OF_GRID, p.SIZE_OF_GRID))
  
-    xA = np.zeros(p.NUMBER_OF_STEPS)
-    xB = np.zeros(p.NUMBER_OF_STEPS)
-    xU = np.zeros(p.NUMBER_OF_STEPS)
+    xA = np.zeros(n_steps)
+    xB = np.zeros(n_steps)
+    xU = np.zeros(n_steps)
  
-    for t in range(p.NUMBER_OF_STEPS):
+    for t in range(n_steps):
         positions = random_walk_step_two_sites(positions, states, grid_A, grid_B,
                                                 p.STEP_SIZE, p.ARENA_SIZE,
                                                 p.GRADIENT_BIAS, p.rng)
