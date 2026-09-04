@@ -33,7 +33,10 @@ def update_two_sites(states,positions, grid_A, grid_B, rng):
     return states
 
 def run_two_site_environment(n_robots=None, n_steps=None, seed=None):
-    positions, states = rsa.initialize_robots(p.NUMBER_OF_ROBOTS, p.ARENA_SIZE, p.rng)
+    n_robots = p.NUMBER_OF_ROBOTS if n_robots is None else n_robots
+    n_steps = p.NUMBER_OF_STEPS if n_steps is None else n_steps
+    local_rng = np.random.default_rng(seed) 
+    positions, states = rsa.initialize_robots(n_robots, p.ARENA_SIZE, local_rng)
     grid_A = np.zeros((p.SIZE_OF_GRID, p.SIZE_OF_GRID))
     grid_B = np.zeros((p.SIZE_OF_GRID, p.SIZE_OF_GRID))
  
@@ -44,8 +47,8 @@ def run_two_site_environment(n_robots=None, n_steps=None, seed=None):
     for t in range(n_steps):
         positions = random_walk_step_two_sites(positions, states, grid_A, grid_B,
                                                 p.STEP_SIZE, p.ARENA_SIZE,
-                                                p.GRADIENT_BIAS, p.rng)
-        states = update_two_sites(states, positions, grid_A, grid_B, p.rng)
+                                                p.GRADIENT_BIAS, local_rng)
+        states = update_two_sites(states, positions, grid_A, grid_B, local_rng)
  
         rsa.deposit_pheromone(grid_A, positions, states, p.SUPPORT_A, p.DEPOSIT_AMOUNT_A)
         rsa.deposit_pheromone(grid_B, positions, states, p.SUPPORT_B, p.DEPOSIT_AMOUNT_B)

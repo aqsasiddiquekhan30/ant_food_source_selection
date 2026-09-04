@@ -9,7 +9,7 @@ def agreement_time(xa, xb):
     decided= xa+xb 
     with np.errstate(divide='ignore', invalid= "ignore"):
         share_A = np.where(decided > 0, xa / np.where(decided > 0, decided, 1), 0)
-        eligible = decided >= p.MIN_DECIDED_RATIO
+    eligible = decided >= p.MIN_DECIDED_RATIO
     agree_A = eligible & (share_A >= p.AGREEMENT_THRESHOLD)
     agree_B = eligible & (share_A <= (1 - p.AGREEMENT_THRESHOLD))
     reached = agree_A | agree_B

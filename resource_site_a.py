@@ -5,7 +5,7 @@ from basic_environment import rand_robo_placement
 
 
 def initialize_robots(number_of_robots, arena_size, rng):
-    positions = rand_robo_placement(number_of_robots, arena_size, p.rng)
+    positions = rand_robo_placement(number_of_robots, arena_size, rng)
     states = np.full(number_of_robots, p.UNDECIDED, dtype=int)
     return positions, states 
 def pheromone_gradient(p_grid, grid_unit):
